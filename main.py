@@ -63,7 +63,7 @@ class __init__():
                         botCore.writeSock("PRIVMSG {0} :Permission denied.\r\n".format(line[2]))
                 # pass the rest to botparse.
                 else:
-                    try:
+                    if (line[1] == 'PRIVMSG' or line[1] == 'NOTICE' or line[1] == 'KICK'):
                         Nick = Utils.getNick(line[0])
                         UHost = Utils.getHost(line[0])
                         Method = line[1]
@@ -77,9 +77,10 @@ class __init__():
                         e.pop(0)
                         Message = string.join(e, '')
                         MsgSplit = Message.split()
-                        Parser.parse(Nick, UHost, Method, Victim, Channel, Message, MsgSplit)
-                    except IndexError:
-                        pass
+                        Parser.PCommandParser(Nick, UHost, Method, Victim, Channel, Message, MsgSplit)
+                    else:
+                        Parser.RawParse(line)
+                        
     except KeyboardInterrupt:
         botCore.s.send("QUIT KeyboardInterrupt raised.\r\n")
         botCore.s.close()

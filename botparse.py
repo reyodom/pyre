@@ -2,6 +2,7 @@ import string
 import re
 import time
 import sys
+import socket
 
 class Admin():
     def Load(self):
@@ -49,7 +50,7 @@ class Utils():
         return j[1]
 
 class Parser():
-    def parse(self, Nick, UHost, Method, Victim, Channel, Message, MsgSplit):
+    def PCommandParser(self, Nick, UHost, Method, Victim, Channel, Message, MsgSplit):
         if(Nick == 'Gattsu' or Nick == 'Ferus'):
             return None
         if(Method == "KICK" and Victim == "Lyra"):
@@ -128,6 +129,16 @@ class Parser():
                      return None   
             else:
                 return None      
+        else:
+            return None
+            
+    def RawParse(self, line):
+        if (line[0] == 'ERROR'):
+            print '--- {0} Disconnected from IRC. Attempting reconnect in 5 seconds...'.format(config.tagC)
+            time.sleep(5)
+            botCore.s.close()
+            botCore.s = socket.socket( )
+            botCore.connect()
         else:
             return None
 
