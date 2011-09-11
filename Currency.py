@@ -1,3 +1,5 @@
+# Steal Google's API to convert currency.
+
 import requests
 import string
 import botCore

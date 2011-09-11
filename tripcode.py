@@ -1,8 +1,9 @@
-# Tripcode generator
+# Tripcode generator.
+from crypt import crypt
+import re
+import string
+
 def Make(password):
-  from crypt import crypt
-  import re
-  import string
   password = password.decode('utf-8')
   password = password.encode("sjis", "ignore")
   password = password.replace('"', "&quot;") \

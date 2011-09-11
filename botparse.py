@@ -7,7 +7,7 @@ import socket
 class Admin():
     def Load(self):
         global admins
-        adminfile=open("admins")
+        adminfile = open('admins')
         admins = adminfile.readlines()
         adminfile.close()
         for i, admin in enumerate(admins):
@@ -19,6 +19,30 @@ class Admin():
             return True
         else:
             return False
+            
+    def Add(self, adder, channel, host):
+        if ('@' not in host) or (host.count('@') > 1):
+            botCore.writeSock("PRIVMSG {0} :'{1}' is not a valid user@host.\r\n".format(channel, host))
+            print '--- {0} {1} tried to add \'{2}\' to the admin list.'.format(config.tagW, adder, host)
+            return None
+        adminfile = open('admins', 'r')
+        admins = adminfile.readlines()
+        if (host in admins) or ('{0}\n'.format(host) in admins):
+            botCore.writeSock("PRIVMSG {0} :'{1}' is already in the admin list!\r\n".format(channel, host))
+            print '--- {0} {1} tried to add \'{2}\' to the admin list.'.format(config.tagW, adder, host)
+            return None
+        adminfile.close()
+        adminfile = open('admins', 'a')
+        size = len(admins)-1
+        if '\n' in admins[size]:
+            pass
+        else:
+            adminfile.write('\n')
+        adminfile.write('{0}\n'.format(host))
+        adminfile.close()
+        print '--- {0} {1} added \'{2}\' to the admin list.'.format(config.tagW, adder, host)
+        Admin().Load()
+        botCore.writeSock("PRIVMSG {0} :'{1}' was added to the admin list.\r\n".format(channel, host))
 
 class Utils():
     floodC = 0
@@ -51,7 +75,7 @@ class Utils():
 
 class Parser():
     def PCommandParser(self, Nick, UHost, Method, Victim, Channel, Message, MsgSplit):
-        if(Nick == 'Gattsu' or Nick == 'Ferus'):
+        if(Nick in config.Ignores):
             return None
         if(Method == "KICK" and Victim == "Lyra"):
             print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Nick)
@@ -110,7 +134,7 @@ class Parser():
                     botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
                     return None 
             elif Message == "*ra":
-                if Admin().Check(UHost.strip()):
+                if Admin().Check(UHost):
                     Admin().Load()
                     print '--- {0} Reloading access list.'.format(config.tagW)
                     botCore.writeSock("PRIVMSG {0} :Reloaded access list.\r\n".format(Channel))
@@ -118,6 +142,11 @@ class Parser():
                 else:
                     botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
                     return None 
+            elif MsgSplit[0] == "*aa":
+                if Admin().Check(UHost):
+                    Admin().Add(Nick, Channel, MsgSplit[1])
+                else:
+                    botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
             elif(Message == "*quit"):
                 if Admin().Check(UHost.strip()):
                     botCore.writeSock("PRIVMSG {0} :Bye!\r\n".format(Channel))

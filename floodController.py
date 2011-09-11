@@ -1,3 +1,6 @@
+# This currently has no use.
+# It will be used.
+# Later.
 import thread
 import time
 from botparse import Utils

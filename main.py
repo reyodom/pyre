@@ -56,11 +56,6 @@ class __init__():
                         Parser = botparse.Parser()
                     else:
                         botCore.writeSock("PRIVMSG {0} :Permission denied.\r\n".format(line[2]))
-                elif(line[1] == "PRIVMSG" and Utils.isChannel(line[2]) and line[3] == ":*debug"):
-                    if Admin.Check(Utils.getHost(line[0])):
-                        print readbuffer
-                    else:
-                        botCore.writeSock("PRIVMSG {0} :Permission denied.\r\n".format(line[2]))
                 # pass the rest to botparse.
                 else:
                     if (line[1] == 'PRIVMSG' or line[1] == 'NOTICE' or line[1] == 'KICK'):

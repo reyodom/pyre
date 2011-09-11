@@ -1,3 +1,6 @@
+# Weeaboo module.
+# Speaking of weeaboos, why not make a contract with me...
+
 import random
 facesAreLoaded='no'
 facelist=[]

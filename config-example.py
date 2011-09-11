@@ -1,5 +1,3 @@
-# Configuration values for Lyra.
-# I'm a lazy fuck who can't parse so this is just a python script that assigns variables
 # rename me to config.py
 
 Host = "lalia.datnode.net"
@@ -12,6 +10,9 @@ Channels = "#hacking"
 
 NickService = 'NickServ'
 NickPass = 'dildos'
+
+# Any nicks in this list will be (partially) ignored by the bot.
+Ignores = ['Ferus', 'Gattsu']
 
 # Info display tags, adjust these for your terminal.
 ## Low priority (green)
