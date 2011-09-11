@@ -50,6 +50,8 @@ class Utils():
 
 class Parser():
     def parse(self, Nick, UHost, Method, Victim, Channel, Message, MsgSplit):
+        if(Nick == 'Gattsu' or Nick == 'Ferus'):
+            return None
         if(Method == "KICK" and Victim == "Lyra"):
             print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Nick)
             time.sleep(2)
