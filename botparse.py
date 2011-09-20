@@ -1,8 +1,5 @@
-import string
-import re
-import time
-import sys
-import socket
+import string, re, time, sys, socket
+from datetime import datetime
 
 class Admin():
     def Load(self):
@@ -72,16 +69,105 @@ class Utils():
         j=string.split(input, "@")
         j=string.split(j[0], "!")
         return j[1]
+    
+    def colour(self, input, colour, style=0):
+        if colour == 'black':
+            return '\033[{2};{0}m{1}\033[0m'.format('30', input, style)
+        if colour == 'red':
+            return '\033[{2};{0}m{1}\033[0m'.format('31', input, style)
+        if colour == 'green':
+            return '\033[{2};{0}m{1}\033[0m'.format('32', input, style)
+        if colour == 'yellow':
+            return '\033[{2};{0}m{1}\033[0m'.format('33', input, style)
+        if colour == 'blue':
+            return '\033[{2};{0}m{1}\033[0m'.format('34', input, style)
+        if colour == 'pink':
+            return '\033[{2};{0}m{1}\033[0m'.format('35', input, style)
+        if colour == 'cyan':
+            return '\033[{2};{0}m{1}\033[0m'.format('36', input, style)
+        if colour == 'white':
+            return '\033[{2};{0}m{1}\033[0m'.format('37', input, style)
+            
+    def getMessage(self, line, type=0, dnp=0):
+        if type == 1:
+            indices = 0, 1, 2, 3
+        elif type == 2:
+            indices = 0, 1
+        elif type == 3:
+            indices = 0, 1, 2, 3, 4
+        else:
+            indices = 0, 1, 2
+        try:
+            e = list(string.join([i for j, i in enumerate(line) if j not in indices]))
+            if (dnp == 0):
+                e.pop(0)
+            Message = string.join(e, '')
+            return Message
+        except IndexError:
+            return ''
+    
+    def displayFormat(self, line):
+        if line[0] == 'PING' \
+        or '00' in line[1] \
+        or '25' in line[1] \
+        or '26' in line[1] \
+        or '37' in line[1] \
+        or '433' in line[1] \
+        or '366' in line[1]:
+            pass
+        elif line[1] == 'NOTICE' and line[2] == 'AUTH':
+            pass
+        elif line[1] == 'KICK':
+            print '* {0}!{1} kicked {2} out of {3} ({4}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.colour(line[3], 'green'), \
+            self.colour(line[2], 'cyan'), \
+            self.getMessage(line, 1))
+        elif line[1] == 'PART':
+            print '* {0}!{1} left {2} ({3}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.colour(line[2], 'cyan'), \
+            self.getMessage(line, 0))
+        elif line[1] == 'QUIT':
+            print '* {0}!{1} left IRC. ({2}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.getMessage(line, 2))
+        elif line[1] == 'NICK':
+            print '* {0}!{1} changed nick to {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.colour(self.getMessage(line, 2), 'green', 1))
+        elif line[1] == 'JOIN':
+            print '* {0}!{1} joined {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.colour(line[2].lstrip(':'), 'cyan'))
+        elif line[1] == 'NOTICE':
+            print '[NOTICE] {0} -> {1}: {2}'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(line[2].strip(':'), 'cyan'), \
+            self.getMessage(line, 0))
+        elif line[1] == 'PRIVMSG':
+            print '{1}: <{0}> {2}'.format(self.colour(self.getNick(line[0]), 'green'), \
+            self.colour(line[2], 'cyan'), \
+            self.getMessage(line, 0))
+        elif line[1] == '332':
+            print '-----'
+            print '* \033[1mTopic for\033[0m {0}: {1}'.format(self.colour(line[3], 'cyan', 0), self.getMessage(line, 1))
+        elif line[1] == '333':
+            print(datetime.fromtimestamp(int(line[5])).strftime('* Set by {0} on \033[1m%d %B %Y\033[0m at \033[1m%I:%M:%S %p\033[0m')).format(self.colour(line[4], 'green'))
+        elif line[1] == '353':
+            print '* Users on {0}: {1}'.format(line[4], self.getMessage(line, 3))
+            print '-----'
+        elif line[1] == 'MODE':
+            print '* {0}!{1} sets mode on {2}: {3}'.format(self.colour(self.getNick(line[0]), 'green', 1), \
+            self.colour(self.getHost(line[0]), 'green'), \
+            self.colour(line[2], 'cyan'), \
+            self.getMessage(line, 0, 1))
+        else:
+            print self.colour(string.join(line), 'black')
 
 class Parser():
-    def PCommandParser(self, Nick, UHost, Method, Victim, Channel, Message, MsgSplit):
+    def CommandParser(self, Nick, UHost, Method, Channel, Message, MsgSplit):
         if(Nick in config.Ignores):
             return None
-        if(Method == "KICK" and Victim == "Lyra"):
-            print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Nick)
-            time.sleep(2)
-            botCore.writeSock("JOIN {0}\r\n".format(Channel))
-            return None 
         elif Method == "PRIVMSG" and Utils().isChannel(Channel):
             if Message == "dicks":
                 botCore.writeSock("PRIVMSG {0} :dildos\r\n".format(Channel))
@@ -89,6 +175,9 @@ class Parser():
             elif Message == "dildos":
                 botCore.writeSock("PRIVMSG {0} :dicks\r\n".format(Channel))
                 return None 
+            elif Message == "h":
+                botCore.writeSock("PRIVMSG {0} :h\r\n".format(Channel))
+                return None
             elif MsgSplit[0] == "*trip":
                 try:
                     password = MsgSplit
@@ -105,9 +194,18 @@ class Parser():
             elif Message == "brb":
                 botCore.writeSock("PRIVMSG {0} :See you later, {1}-kun.\r\n".format(Channel, Nick))
                 return None 
+            elif Message == "*stitime":
+                botCore.writeSock("PRIVMSG {0} :{1}\r\n".format(Channel, stitime.stiTime()))
+                return None
+            elif MsgSplit[0] == "*lookup":
+                try:
+                    dnslookup.detect(Nick, Channel, MsgSplit[1])
+                    return None
+                except IndexError:
+                    botCore.writeSock("PRIVMSG {0} :Not enough arguments.\r\n".format(Channel))
             elif MsgSplit[0] == "*cc":
                 try:
-                    test=MsgSplit[4]
+                    test=MsgSplit[3]
                     Currency.currencyConvert(Nick, Channel, MsgSplit[1], MsgSplit[2], MsgSplit[3])
                     return None 
                 except IndexError:
@@ -170,10 +268,22 @@ class Parser():
             botCore.connect()
         else:
             return None
+    
+    def OnKick(self, Kicker, KHost, Channel, Victim, Reason):
+        if(Victim == botCore.OurNick):
+            print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Kicker)
+            if config.kickRejoin == True:
+                time.sleep(2)
+                botCore.writeSock("JOIN {0}\r\n".format(Channel))
+                return None
+            else:
+                return None
 
 import botCore
 import kawaii
 import Currency
 import tripcode
 import config      
-import floodController
+# import floodController
+import stitime
+import dnslookup

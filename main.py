@@ -23,17 +23,7 @@ class __init__():
             readbuffer=t.pop( )
             for line in t:
                 line=string.split(string.rstrip(line))
-                if line[0] == 'PING' \
-                or '00' in line[1] \
-                or '25' in line[1] \
-                or '26' in line[1] \
-                or '37' in line[1] \
-                or '433' in line[1]:
-                    pass
-                elif line[1] == 'NOTICE' and line[2] == 'AUTH':
-                    pass
-                else:    
-                    print string.join(line)
+                Utils.displayFormat(line)
                 # these are more important, so use main to take care of them instead of botparse
                 if(line[1]=="433"):
                     print '--- {0} Nick {1} is already taken!'.format(config.tagW, line[3])
@@ -58,21 +48,18 @@ class __init__():
                         botCore.writeSock("PRIVMSG {0} :Permission denied.\r\n".format(line[2]))
                 # pass the rest to botparse.
                 else:
-                    if (line[1] == 'PRIVMSG' or line[1] == 'NOTICE' or line[1] == 'KICK'):
-                        Nick = Utils.getNick(line[0])
-                        UHost = Utils.getHost(line[0])
-                        Method = line[1]
-                        Channel = line[2]
-                        indices = 0, 1, 2
-                        Victim = None
-                        if Method == 'KICK':
-                            Victim = line[3]
-                            indices = 0, 1, 2, 3
-                        e = list(string.join([i for j, i in enumerate(line) if j not in indices]))
-                        e.pop(0)
-                        Message = string.join(e, '')
-                        MsgSplit = Message.split()
-                        Parser.PCommandParser(Nick, UHost, Method, Victim, Channel, Message, MsgSplit)
+                    if (line[1] == 'PRIVMSG' or line[1] == 'NOTICE'):
+                        try:
+                            # format for parser.
+                            Message = Utils.getMessage(line, 0)
+                            MsgSplit = Message.split()
+                            Parser.CommandParser(Utils.getNick(line[0]), Utils.getHost(line[0]), line[1], line[2], Message, MsgSplit)
+                        except IndexError:
+                            # drop the message if it consists of only whitespace.
+                            pass
+                    elif line[1] == 'KICK':
+                        Message = Utils.getMessage(line, 1)
+                        Parser.OnKick(Utils.getNick(line[0]), Utils.getHost(line[0]), line[2], line[3], Message)
                     else:
                         Parser.RawParse(line)
                         
