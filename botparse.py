@@ -237,7 +237,10 @@ class Parser():
                 if Admin().Check(UHost):
                     try:
                         test=MsgSplit[1]
-                        botCore.writeSock("JOIN {0}\r\n".format(MsgSplit[1]))
+                        if (MsgSplit[1] not in botCore.JoinedChannels):
+                            botCore.writeSock("JOIN {0}\r\n".format(MsgSplit[1]))
+                        else:
+                            botCore.writeSock("PRIVMSG {0} :I'm already on {1}, you derp.\r\n".format(Channel, MsgSplit[1]))
                         return None
                     except IndexError:
                         botCore.writeSock("PRIVMSG {0} :No channel specified.\r\n".format(Channel))
@@ -249,7 +252,10 @@ class Parser():
                 if Admin().Check(UHost):
                     try:
                         test=MsgSplit[1]
-                        botCore.writeSock("PART {0} :wherp\r\n".format(MsgSplit[1]))
+                        if (MsgSplit[1] in botCore.JoinedChannels):
+                            botCore.writeSock("PART {0} :wherp\r\n".format(MsgSplit[1]))
+                        else:
+                            botCore.writeSock("PRIVMSG {0} :I'm not on {1}, you derp.\r\n".format(Channel, MsgSplit[1]))
                         return None
                     except IndexError:
                         botCore.writeSock("PRIVMSG {0} :No channel specified.\r\n".format(Channel))
@@ -306,13 +312,11 @@ class Parser():
             botCore.connect()
         elif (line[1] == 'JOIN' and Utils().getNick(line[0]) == botCore.OurNick):
             botCore.JoinedChannels.append(line[2].lstrip(':'))
-            print botCore.JoinedChannels
         elif (line[1] == 'PART' and Utils().getNick(line[0]) == botCore.OurNick):
             try: 
                 botCore.JoinedChannels.remove(line[2])
             except:
                 print '???'
-            print botCore.JoinedChannels
         else:
             return None
     
