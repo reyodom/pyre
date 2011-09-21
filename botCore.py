@@ -11,6 +11,7 @@ import config
 Admin = Admin()
 s=socket.socket( )
 OurNick = '?'
+JoinedChannels = []
 connected = 0
 
 def connect():

@@ -89,6 +89,9 @@ class Utils():
             return '\033[{2};{0}m{1}\033[0m'.format('37', input, style)
             
     def getMessage(self, line, type=0, dnp=0):
+        '''
+        This does something, I'm just not sure what it is...'
+        '''
         if type == 1:
             indices = 0, 1, 2, 3
         elif type == 2:
@@ -118,38 +121,49 @@ class Utils():
         elif line[1] == 'NOTICE' and line[2] == 'AUTH':
             pass
         elif line[1] == 'KICK':
-            print '* {0}!{1} kicked {2} out of {3} ({4}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
-            self.colour(line[3], 'green'), \
-            self.colour(line[2], 'cyan'), \
+            print '* {0}!{1} kicked {2} out of {3} ({4}).'.format(self.colour(self.getNick(line[0]), 'green', 1),
+            self.colour(self.getHost(line[0]), 'green'),
+            self.colour(line[3], 'green'),
+            self.colour(line[2], 'cyan'),
             self.getMessage(line, 1))
         elif line[1] == 'PART':
-            print '* {0}!{1} left {2} ({3}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
-            self.colour(line[2], 'cyan'), \
-            self.getMessage(line, 0))
+            if (self.getNick(line[0]) == botCore.OurNick):
+                print '* I left {0}. ({1})'.format(self.colour(line[2], 'cyan'),
+                self.getMessage(line, 0))
+            else:
+                print '* {0}!{1} left {2} ({3}).'.format(self.colour(self.getNick(line[0]), 'green', 1),
+                self.colour(self.getHost(line[0]), 'green'),
+                self.colour(line[2], 'cyan'),
+                self.getMessage(line, 0))
         elif line[1] == 'QUIT':
-            print '* {0}!{1} left IRC. ({2}).'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
+            print '* {0}!{1} left IRC. ({2})'.format(self.colour(self.getNick(line[0]), 'green', 1),
+            self.colour(self.getHost(line[0]), 'green'),
             self.getMessage(line, 2))
         elif line[1] == 'NICK':
-            print '* {0}!{1} changed nick to {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
-            self.colour(self.getMessage(line, 2), 'green', 1))
+            if (self.getNick(line[0]) == botCore.OurNick):
+                print '* My nick was changed to {0}.'.format(self.colour(self.getMessage(line, 2), 'green', 1))
+                botCore.OurNick = self.getMessage(line, 2)
+            else:
+                print '* {0}!{1} changed nick to {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1),
+                self.colour(self.getHost(line[0]), 'green'),
+                self.colour(self.getMessage(line, 2), 'green', 1))
         elif line[1] == 'JOIN':
-            print '* {0}!{1} joined {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
-            self.colour(line[2].lstrip(':'), 'cyan'))
+            if (self.getNick(line[0]) == botCore.OurNick):
+                print '* I joined {0}.'.format(self.colour(line[2].lstrip(':'), 'cyan'))
+                print '-----'
+            else:
+                print '* {0}!{1} joined {2}.'.format(self.colour(self.getNick(line[0]), 'green', 1),
+                self.colour(self.getHost(line[0]), 'green'),
+                self.colour(line[2].lstrip(':'), 'cyan'))
         elif line[1] == 'NOTICE':
-            print '[NOTICE] {0} -> {1}: {2}'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(line[2].strip(':'), 'cyan'), \
+            print '[NOTICE] {0} -> {1}: {2}'.format(self.colour(self.getNick(line[0]), 'green', 1),
+            self.colour(line[2].strip(':'), 'cyan'),
             self.getMessage(line, 0))
         elif line[1] == 'PRIVMSG':
-            print '{1}: <{0}> {2}'.format(self.colour(self.getNick(line[0]), 'green'), \
-            self.colour(line[2], 'cyan'), \
+            print '{1}: <{0}> {2}'.format(self.colour(self.getNick(line[0]), 'green'),
+            self.colour(line[2], 'cyan'),
             self.getMessage(line, 0))
         elif line[1] == '332':
-            print '-----'
             print '* \033[1mTopic for\033[0m {0}: {1}'.format(self.colour(line[3], 'cyan', 0), self.getMessage(line, 1))
         elif line[1] == '333':
             print(datetime.fromtimestamp(int(line[5])).strftime('* Set by {0} on \033[1m%d %B %Y\033[0m at \033[1m%I:%M:%S %p\033[0m')).format(self.colour(line[4], 'green'))
@@ -157,9 +171,9 @@ class Utils():
             print '* Users on {0}: {1}'.format(line[4], self.getMessage(line, 3))
             print '-----'
         elif line[1] == 'MODE':
-            print '* {0}!{1} sets mode on {2}: {3}'.format(self.colour(self.getNick(line[0]), 'green', 1), \
-            self.colour(self.getHost(line[0]), 'green'), \
-            self.colour(line[2], 'cyan'), \
+            print '* {0}!{1} sets mode on {2}: {3}'.format(self.colour(self.getNick(line[0]), 'green', 1),
+            self.colour(self.getHost(line[0]), 'green'),
+            self.colour(line[2], 'cyan'),
             self.getMessage(line, 0, 1))
         else:
             print self.colour(string.join(line), 'black')
@@ -231,6 +245,30 @@ class Parser():
                 else:
                     botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
                     return None 
+            elif MsgSplit[0] == "*leave":
+                if Admin().Check(UHost):
+                    try:
+                        test=MsgSplit[1]
+                        botCore.writeSock("PART {0} :wherp\r\n".format(MsgSplit[1]))
+                        return None
+                    except IndexError:
+                        botCore.writeSock("PRIVMSG {0} :No channel specified.\r\n".format(Channel))
+                        return None 
+                else:
+                    botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
+                    return None
+            elif MsgSplit[0] == "*nick":
+                if Admin().Check(UHost):
+                    try:
+                        test=MsgSplit[1]
+                        botCore.writeSock("NICK :{0}\r\n".format(MsgSplit[1]))
+                        return None
+                    except IndexError:
+                        botCore.writeSock("PRIVMSG {0} :Specify a nick.\r\n".format(Channel))
+                        return None 
+                else:
+                    botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
+                    return None
             elif Message == "*ra":
                 if Admin().Check(UHost):
                     Admin().Load()
@@ -266,6 +304,15 @@ class Parser():
             botCore.s.close()
             botCore.s = socket.socket( )
             botCore.connect()
+        elif (line[1] == 'JOIN' and Utils().getNick(line[0]) == botCore.OurNick):
+            botCore.JoinedChannels.append(line[2].lstrip(':'))
+            print botCore.JoinedChannels
+        elif (line[1] == 'PART' and Utils().getNick(line[0]) == botCore.OurNick):
+            try: 
+                botCore.JoinedChannels.remove(line[2])
+            except:
+                print '???'
+            print botCore.JoinedChannels
         else:
             return None
     
