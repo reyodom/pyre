@@ -328,8 +328,7 @@ class Parser():
         if(Victim == botCore.OurNick):
             print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Kicker)
             if config.kickRejoin == True:
-                t = Timer(2, botCore.writeSock, "JOIN {0}\r\n".format(Channel))
-                t.start()
+                botCore.writeSock("JOIN :{0}\r\n".format(Channel))
                 return None
             else:
                 return None
