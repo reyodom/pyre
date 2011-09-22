@@ -1,5 +1,6 @@
 import string, re, time, sys, socket
 from datetime import datetime
+from threading import Timer
 
 class Admin():
     def Load(self):
@@ -291,8 +292,11 @@ class Parser():
                     botCore.writeSock("PRIVMSG {0} :You don't have permission to do that.\r\n".format(Channel))
             elif(Message == "*quit"):
                 if Admin().Check(UHost.strip()):
-                    botCore.writeSock("PRIVMSG {0} :Bye!\r\n".format(Channel))
-                    botCore.writeSock("QUIT Bye!\r\n")
+                    # remember to clear the queue before we abruptly quit
+                    botCore.clearQueue()
+                    botCore.s.send("PRIVMSG {0} :Quitting now...\r\n".format(Channel))
+                    botCore.s.send("QUIT Bye!\r\n")
+                    time.sleep(1)
                     botCore.s.close()
                     sys.exit('--- {0} *quit command issued.'.format(config.tagC))
                 else:
@@ -324,8 +328,8 @@ class Parser():
         if(Victim == botCore.OurNick):
             print '--- {0} I was kicked from {1} by {2}.'.format(config.tagW, Channel, Kicker)
             if config.kickRejoin == True:
-                time.sleep(2)
-                botCore.writeSock("JOIN {0}\r\n".format(Channel))
+                t = Timer(2, botCore.writeSock, "JOIN {0}\r\n".format(Channel))
+                t.start()
                 return None
             else:
                 return None

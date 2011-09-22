@@ -64,6 +64,8 @@ class __init__():
                         Parser.RawParse(line)
                         
     except KeyboardInterrupt:
+        # remember to clear the queue before we abruptly quit
+        botCore.clearQueue()
         botCore.s.send("QUIT KeyboardInterrupt raised.\r\n")
         botCore.s.close()
         time.sleep(0.5)
