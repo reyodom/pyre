@@ -2,21 +2,16 @@
 # This manages Lyra's connection to IRC.
 # v1.6, by stal
 
-import socket
-from threading import Timer
-import string
-from botparse import Admin
+import socket, time
+from Parser import Admin
 import config
-import time
 
 Admin = Admin()
-s=socket.socket( )
+s=socket.socket()
 OurNick = '?'
 JoinedChannels = []
-connected = 0
 
 def connect():
-    Admin.Load()
     print '--- {0} Opening connection to {1} on port {2}'.format(config.tagI, config.Host, config.Port)
     s.connect((config.Host, config.Port))
     connected=1

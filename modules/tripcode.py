@@ -3,7 +3,7 @@ from crypt import crypt
 import re
 import string
 
-def Make(password):
+def Make(ws, Channel, password):
   password = password.decode('utf-8')
   password = password.encode("sjis", "ignore")
   password = password.replace('"', "&quot;") \
@@ -13,4 +13,5 @@ def Make(password):
          .replace(",", ",")
   salt = re.sub(r"[^\.-z]", ".", (password + "H..")[1:3])
   salt = salt.translate(string.maketrans(r":;=?@[\]^_`", "ABDFGabcdef"))
-  return crypt(password, salt)[-10:]
+  ws("PRIVMSG {0} :\x02Tripcode: !\x02{1}\r\n".format(Channel, crypt(password, salt)[-10:]))
+  

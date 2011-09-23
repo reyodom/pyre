@@ -1,5 +1,5 @@
 from dns import resolver,reversename
-import re, botCore
+from re import search
 
 gtlds = ['aero', 'asia', 'biz', 'cat', 'com', 'coop', 'edu', 'gov', 'info',
 'int', 'jobs', 'mil', 'mobi', 'museum', 'name', 'net', 'org', 'pro', 'tel',
@@ -35,18 +35,18 @@ def dLookup(addr):
     except:
         return 'DNS lookup failed for {0}\r\n'.format(addr)
 
-def detect(Nick, Channel, addr):
+def detect(ws, Nick, Channel, addr):
     addr = addr.lstrip('http://')
     addr = addr.partition('/')[0]
-    if re.search('^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$', addr):
+    if search('^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$', addr):
         if Nick in rDNSWhitelist:
-            botCore.writeSock('PRIVMSG {0} :{1}\r\n'.format(Channel, rLookup(addr)))
+            ws('PRIVMSG {0} :{1}\r\n'.format(Channel, rLookup(addr)))
         else:
-            botCore.writeSock('PRIVMSG {0} :No.\r\n'.format(Channel))
+            ws('PRIVMSG {0} :No reverse lookups for you.\r\n'.format(Channel))
     else:
         d = addr.split('.')
         if (d[len(d) - 1] in gtlds) or (d[len(d) - 1] in cctlds):
-            botCore.writeSock('PRIVMSG {0} :{1}\r\n'.format(Channel, dLookup(addr)))
+            ws('PRIVMSG {0} :{1}\r\n'.format(Channel, dLookup(addr)))
         else:
-            botCore.writeSock('PRIVMSG {0} :{1} is not a valid TLD!\r\n'.format(Channel, d[len(d) - 1]))
+            ws('PRIVMSG {0} :\'{1}\' is not a valid TLD!\r\n'.format(Channel, d[len(d) - 1]))
 
